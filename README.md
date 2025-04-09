@@ -9,5 +9,4 @@
 | emailservice                                       | Python        | 
 | checkoutservice                                    | Go            | 
 | recommendationservice                              | Python        |
-| adservice                                          | Java          |
 | loadgenerator                                      | Python/Locust | 
