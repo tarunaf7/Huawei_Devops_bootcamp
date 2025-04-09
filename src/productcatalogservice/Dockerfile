@@ -1,0 +1,42 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FROM golang:1.23.4-alpine@sha256:c23339199a08b0e12032856908589a6d41a0dab141b8b3b21f156fc571a3f1d3 AS builder
+ARG TARGETOS
+ARG TARGETARCH
+
+WORKDIR /src
+
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+
+ARG SKAFFOLD_GO_GCFLAGS
+RUN CGO_ENABLED=0 go build -o /productcatalogservice .
+
+FROM scratch
+
+WORKDIR /src
+COPY --from=builder /productcatalogservice ./server
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY products.json .
+
+
+
+
+ENV GOTRACEBACK=single
+
+EXPOSE 3550
+ENTRYPOINT ["/src/server"]

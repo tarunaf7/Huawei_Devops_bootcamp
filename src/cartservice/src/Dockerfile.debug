@@ -1,0 +1,33 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0@sha256:7d24e90a392e88eb56093e4eb325ff883ad609382a55d42f17fd557b997022ca AS build
+WORKDIR /app
+COPY . .
+RUN dotnet restore cartservice.csproj
+RUN dotnet build "./cartservice.csproj" -c Debug -o /out
+
+FROM build AS publish
+RUN dotnet publish cartservice.csproj -c Debug -o /out
+
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:372b16214ae67e3626a5b1513ade4a530eae10c172d56ce696163b046565fa46 AS final
+
+RUN apt-get update \
+    && apt-get install -y unzip procps wget
+WORKDIR /app
+COPY --from=publish /out .
+ENV ASPNETCORE_HTTP_PORTS=7070
+
+ENTRYPOINT ["dotnet", "cartservice.dll"]
